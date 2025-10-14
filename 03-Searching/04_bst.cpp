@@ -11,8 +11,6 @@ typedef struct Node {
     struct Node* parent;
 } TreeNode;
 
-typedef int entero;
-
 void BST_show_pre_order(TreeNode* T) {
     if( T == NULL ) return;
     cout << T->data << " ";
