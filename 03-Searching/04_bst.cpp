@@ -158,6 +158,13 @@ void BST_delete(TreeNode* T, int value) {
     } else cout << "El dato " << value << " no está en el BST.\n";
 }
 
+void BST_destroy(TreeNode* T) {
+    if( T == NULL ) return;
+    BST_destroy(T->left);
+    BST_destroy(T->right);
+    delete T;
+}
+
 int main() {
     TreeNode* T = NULL;
 
@@ -185,6 +192,8 @@ int main() {
 
     T = BST_insert(BST_insert(BST_insert(BST_insert(T, 5), 33), 71), 100);
     BST_show_with_levels(T, 0);
+
+    BST_destroy(T);
 
     return 0;
 }
