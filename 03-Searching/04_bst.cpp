@@ -35,6 +35,7 @@ void BST_show_in_order(TreeNode* T) {
 }
 
 void BST_show(TreeNode* T, enum mode modo) {
+    cout << "[ ";
     switch (modo) {
         case PRE:
             BST_show_pre_order(T);
@@ -46,6 +47,14 @@ void BST_show(TreeNode* T, enum mode modo) {
             BST_show_post_order(T);
             break;
     }
+    cout << "]\n";
+}
+
+void BST_show_with_levels(TreeNode* T, int level) {
+    if( T == NULL ) return;
+    cout << [level](){ string r = ""; for(int i = 0; i < level; ++i) r+="   "; return r; }() << T->data << "\n";
+    BST_show_with_levels(T->left, level + 1);
+    BST_show_with_levels(T->right, level + 1);
 }
 
 TreeNode* create_node(int n) {
@@ -148,13 +157,36 @@ void BST_delete(TreeNode* T, int value) {
             swap(dead->data, ios->data);
             dead = ios;
         } while(true);
-    } else cout << "El dato no está en el BST.\n";
+    } else cout << "El dato " << value << " no está en el BST.\n";
 }
 
-entero main() {
-    entero x = 3;
-
+int main() {
     TreeNode* T = NULL;
+
+    BST_show(T, IN);
+    T = BST_insert(T, 52);
+    BST_show(T, IN);
+    T = BST_insert(T, 16);
+    BST_show(T, IN);
+    T = BST_insert(T, 3);
+    BST_show(T, IN);
+    T = BST_insert(T, 75);
+    BST_show(T, IN);
+    T = BST_insert(T, 90);
+    BST_show(T, IN);
+    T = BST_insert(T, 66);
+    BST_show(T, IN);
+
+    BST_delete(T, 52);
+    BST_show(T, IN);
+    BST_delete(T, 52);
+    BST_delete(T, 75);
+    BST_show(T, IN);
+    BST_delete(T, 3);
+    BST_show(T, IN);
+
+    T = BST_insert(BST_insert(BST_insert(BST_insert(T, 5), 33), 71), 100);
+    BST_show_with_levels(T, 0);
 
     return 0;
 }
