@@ -519,25 +519,47 @@ void RBT_delete(int value) {
         /* Escenario 2.2 */
 
         //s es BLACK
-        //Esto puede pasar si s es nulo, o si tiene dato y su color es BLACK
-        if( s == NULL || s->color == BLACK ) {
+        if( s->color == BLACK ) {
             //los dos n son BLACK
-            //
-            if( (s == NULL) || ((s->left == NULL || s->left->color == BLACK) && (s->right == NULL || s->right->color == BLACK)) ) {
+            //Todo n que sea nulo es BLACK.
+            if( (s->left == NULL || s->left->color == BLACK) && (s->right == NULL || s->right->color == BLACK) ) {
+                //h se hace BLACK
+                //Se verifica primero que h no sea nulo
                 if( h != NULL) h->color = BLACK;
-                if( s != NULL ) s->color = RED;
+                //s se hace RED
+                s->color = RED;
+
+                /* Se procede a checar el color de p */
+
+                //p es BLACK
                 if( p->color == BLACK ) {
+                    //p se hace DOUBLE_BLACK
                     p->color = DOUBLE_BLACK;
+                    //p se hace el nuevo h
                     h = p;
+                    //Se actualiza p con el padre del nuevo h
                     p = h->parent;
+                    //Se actualiza s con el hermano del nuevo h
+                    //Si h está a la izquierda de p, s es el hijo derecho de p
                     if( check_child_side(h) == LEFT) s = p->right;
+                    //Si h está a la derecha de p, s es el hijo izquierdo de p
                     else s = p->left;
+
+                    //Se regresa al punto después de que h se hizo DOUBLE_BLACK
                     continue;
-                } else {
+                }
+                //p es RED
+                else {
+                    //p se hace BLACK
                     p->color = BLACK;
+
+                    //Se termina el proceso
                     break;
                 }
-            } else {
+            }
+            //al menos un n es RED
+            else {
+                
                 TreeNode* n = NULL;
                 if( s->left != NULL && s->left->color == RED ) n = s->left;
                 else n = s->right;
@@ -557,7 +579,12 @@ void RBT_delete(int value) {
                 if( h != NULL) h->color = BLACK;
                 break;
             }
-        } else {
+        }
+
+        /* Escenario 2.3 */
+
+        //s es RED
+        else {
             swap(p->color, s->color);
             if( check_child_side(s) == LEFT ){
                 rightRotation(p,s);
@@ -609,13 +636,13 @@ int main() {
     for(int i = 0; i < 18; ++i)
         RBT_insert(values[i]);
     //RBT_show_with_levels(T, 0);
-    //RBT_delete(14);
+    RBT_delete(14);
     //RBT_delete(13);
     //RBT_delete(6);RBT_delete(11);
     //RBT_delete(18);
     //RBT_delete(2); RBT_delete(6); RBT_delete(5); RBT_delete(11); RBT_delete(13); RBT_delete(18); RBT_delete(14); RBT_delete(15);
     //RBT_delete(2); RBT_delete(6); RBT_delete(5);
-    RBT_delete(45);
+    //RBT_delete(45);
     RBT_show_with_levels(T, 0);
     
     
