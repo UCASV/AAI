@@ -1,18 +1,23 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// Enumeración utilizada para la posición de un nodo con respecto a su padre
 enum side {NONE, LEFT, RIGHT};
+// Enumeración utilizada para los distintos tipos de recorridos de un árbol binario
 enum mode {PRE, IN, POST};
+// Enumeración utilizada para los colores de los nodos en un RBT
 enum color {RED, BLACK, DOUBLE_BLACK};
 
+// Estructura de un nodo de un RBT
 typedef struct Node {
-    int data;
-    enum color color;
-    struct Node* left;
-    struct Node* right;
-    struct Node* parent;
+    int data;               // Dato del nodo
+    enum color color;       // Color del nodo
+    struct Node* left;      // Puntero al hijo izquierdo
+    struct Node* right;     // Puntero al hijo derecho
+    struct Node* parent;    // Puntero al padre
 } TreeNode;
 
+// Variable global que apunta a la raíz del RBT
 TreeNode* T = NULL;
 
 /**************** BST functions ****************/
@@ -64,7 +69,8 @@ void BST_show_with_levels(TreeNode* T, int level) {
 TreeNode* create_node(int n) {
     TreeNode* node = new TreeNode();
     node->data = n;
-    node->color = RED;
+    node->color = RED;  //Esta es la única adición, ya que los nodos
+                        //de un RBT inician de color RED
     node->left = node->right = node->parent = NULL;
     
     return node;
@@ -111,159 +117,362 @@ void BST_destroy(TreeNode* T) {
 }
 
 /**************** Updated BST functions ****************/
+/*
+    - La función BST_insert fue adaptada para manejar la
+      variable global T que apunta a la raíz del RBT.
+    - La función BST_delete fue adaptada para retornar la
+      dirección del hijo único del nodo eliminado (de acuerdo
+      a como lo visualiza el algoritmo de borrado de nodos en
+      un RBT). Esto permitió además unificar los casos 2.1 y
+      2.2 en un solo bloque de código.
+*/
 
+/* Función auxiliar para insertar un nuevo nodo */
 void BST_insert_aux(TreeNode* T, int value) {
+    //Se verifica si debe insertarse en el subárbol
+    //izquierdo o el derecho
     if( value <= T->data ) {
+        //Se verifica si el hijo izquierdo está vacante
         if( T->left == NULL ) {
+            //Se crea el nuevo nodo como el hijo izquierdo
+            //del nodo actual
             T->left = create_node(value);
+            //El padre del nuevo nodo es el nodo actual
             T->left->parent = T;
-        } else BST_insert_aux(T->left, value);
+        }
+        //De lo contrario, se envía el subárbol izquierdo
+        //en recursión
+        else BST_insert_aux(T->left, value);
     } else {
+        //Se verifica si el hijo derecho está vacante
         if( T->right == NULL ) {
+            //Se crea el nuevo nodo como el hijo derecho
+            //del nodo actual
             T->right = create_node(value);
+            //El padre del nuevo nodo es el nodo actual
             T->right->parent = T;
-        } else BST_insert_aux(T->right, value);
+        }
+        //De lo contrario, se envía el subárbol derecho
+        //en recursión
+        else BST_insert_aux(T->right, value);
     }
 }
 
+/* Función principal para insertar un nuevo nodo */
 void BST_insert(int value) {
-    if( T == NULL ) T = create_node(value);
+    //Si el árbol está vacío, el nuevo nodo será la raíz
+    if( T == NULL ) T = create_node(value); //Se crea el nuevo nodo
+    //De lo contrario, se delega la inserción a la función auxiliar
     else BST_insert_aux(T, value);
 }
 
+/* 
+    Función para borrar un nodo que contenga el dato indicado
+    Se asume que el dato sí se encuentra dentro del árbol.
+    (Es responsabilidad del usuario verificarlo antes de borrar)
+*/
 TreeNode* BST_delete(int value) {
+    //Se extrae el nodo a eliminar
     TreeNode* dead = BST_get(T, value);
+
+    //Se procede a evaluar cuál caso de borrado corresponde.
+    //Se encierra el bloque en un DO-WHILE ya que es posible que
+    //el proceso reinicie (aunque se sabe que si ocurre, solo
+    //ocurriría una vez)
     do{
-        //Caso 1
+        //Caso 1: Los dos hijos del nodo a borrar son nulos
         if( dead->left == NULL && dead->right == NULL ) {
+            //Si el padre no es nulo, se debe actualizar que uno
+            //de sus hijos será eliminado
             if( dead->parent != NULL)
+                //Se verifica si el nodo a eliminar es el hijo izquierdo de su padre
                 if( check_child_side(dead) == LEFT )
-                    dead->parent->left = NULL;
-                else dead->parent->right = NULL;
+                    dead->parent->left = NULL;  //Se registra la eliminación en el padre
+                //o si es el hijo derecho de su padre
+                else dead->parent->right = NULL;  //Se registra la eliminación en el padre
+            //Si el padre es nulo, entonces el nodo a eliminar es
+            //la raíz, por lo que se debe setear T a NULL
             else T = NULL;
 
+            //Se elimina el nodo
             delete dead;
+            //Se retorna NULL (NIL) como el hijo único del nodo eliminado
             return NULL;
         }
 
-        //Caso 2
+        //Caso 2: Solo un hijo del nodo a borrar no es nulo
         if( (dead->left != NULL && dead->right == NULL) || ( dead->left == NULL && dead->right != NULL )) {
+            //Se extrae la dirección del hijo único (no nulo) del nodo a eliminar
             TreeNode* h = ((dead->left != NULL)?dead->left:dead->right);
+            //Si el padre no es nulo, se debe actualizar que uno
+            //de sus hijos será eliminado
             if( dead->parent != NULL){
-                if( check_child_side(dead) == LEFT ) dead->parent->left = h;
-                else dead->parent->right = h;
+                //Se verifica si el nodo a eliminar es el hijo izquierdo de su padre
+                if( check_child_side(dead) == LEFT )
+                    dead->parent->left = h;  //Se registra la eliminación en el padre
+                //o si es el hijo derecho de su padre
+                else dead->parent->right = h;  //Se registra la eliminación en el padre
+                //El nuevo padre del hijo único es el padre del nodo a eliminar
                 h->parent = dead->parent;
-            } else T = h;
-
+            }
+            //Si el padre es nulo, entonces el nodo a eliminar es
+            //la raíz, por lo que se debe setear T a NULL
+            else T = h;
+            
+            //Se elimina el nodo
             delete dead;
+            //Se retorna el hijo único
             return h;
         }
 
-        //Caso 3
+        //Caso 3: Los dos hijos del nodo a borrar son no nulos
+        //Se encuentra el IN-ORDER Sucessor del nodo a eliminar
         TreeNode* ios = BST_extractIOS(dead->right);
+        //Se intercambia los datos del nodo a borrar y del IOS
         swap(dead->data, ios->data);
+        //El nuevo nodo a eliminar es el IOS
         dead = ios;
-    } while(true);
+    } while(true); //Acá se reinicia el proceso, pero se sabe que irá a parar ya sea en el Caso 1 o en el Caso 2
 }
 
 /**************** Rotation functions ****************/
 
+/* 
+    Función para ejecutar la Rotación a la Izquierda de los nodos A y B
+    Se asume que A es el padre de B
+*/
 void leftRotation(TreeNode* A, TreeNode* B) {
+    /* Corte y Reconexión de la parte superior */
+
+    //Se verifica si A tiene padre
     if( A->parent != NULL ) {
-        if( check_child_side(A) == LEFT ){
+        //Se verifica de qué lado de su padre se encuentra A
+        if( check_child_side(A) == LEFT )
+            //B será el nuevo hijo izquierdo del padre de A
             A->parent->left = B;
-        } else {
+        else
+            //B será el nuevo hijo derecho del padre de A
             A->parent->right = B;
-        }
-        B->parent = A->parent;
-    } else T = B;
+    }
+    //Si A no tiene padre, A es la raíz del árbol,
+    //y después de rotar la nueva raíz será B
+    else T = B;
     
+    //El nuevo padre de B es el padre de A
+    B->parent = A->parent;
+    
+    /* Corte y Reconexión del "Hijo Huérfano" */
+
+    //El nuevo hijo derecho de A es el hijo izquierdo de B
     A->right = B->left;
+    //Si este "huérfano reubicado" no es nulo, se actualiza
+    //que su nuevo padre es A
     if( A->right != NULL ) A->right->parent = A;
 
+    /* Corte y reconexión de los nodos involucrados */
+
+    //El nuevo hijo izquierdo de B es A
     B->left = A;
+    //El nuevo padre de A es B
     A->parent = B;
 }
 
+/* 
+    Función para ejecutar la Rotación a la Derecha de los nodos A y B
+    Se asume que A es el padre de B
+*/
 void rightRotation(TreeNode* A, TreeNode* B) {
+    /* Corte y Reconexión de la parte superior */
+
+    //Se verifica si A tiene padre
     if( A->parent != NULL ) {
-        if( check_child_side(A) == LEFT ){
+        //Se verifica de qué lado de su padre se encuentra A
+        if( check_child_side(A) == LEFT )
+            //B será el nuevo hijo izquierdo del padre de A
             A->parent->left = B;
-        } else {
+        else
+            //B será el nuevo hijo derecho del padre de A
             A->parent->right = B;
-        }
+        //El nuevo padre de B es el padre de A
         B->parent = A->parent;
-    } else T = B;
+    }
+    //Si A no tiene padre, A es la raíz del árbol,
+    //y después de rotar la nueva raíz será B
+    else T = B;
     
+    /* Corte y Reconexión del "Hijo Huérfano" */
+
+    //El nuevo hijo izquierdo de A es el hijo derecho de B
     A->left = B->right;
+    //Si este "huérfano reubicado" no es nulo, se actualiza
+    //que su nuevo padre es A
     if( A->left != NULL ) A->left->parent = A;
 
+    /* Corte y reconexión de los nodos involucrados */
+
+    //El nuevo hijo derecho de B es A
     B->right = A;
+    //El nuevo padre de A es B
     A->parent = B;
 }
 
 /**************** RBT functions ****************/
 
+/* 
+    Función para mostrar el contenido de un RBT de forma jerárquica,
+    es decir, dejando explícito cuáles son los hijos de cada nodo y
+    a que nivel del árbol se encuentran.
+    Esta función hace el recorrido estrictamente en PRE-ORDER.
+*/
 void RBT_show_with_levels(TreeNode* T, int level) {
+    /*
+        La siguiente línea coloca el contenido del nodo actual de la siguiente manera:
+        - Coloca primero una cantidad de espacio equivalente al nivel actual de
+          profundidad en el árbol (indicado por el parámetro level).
+        - Coloca después el dato del nodo actual. Si el nodo actual es un nodo nulo,
+          coloca entonces un '-' para indicarlo.
+        - Por último, coloca una 'B' si el color del nodo actual es BLACK, y coloca una
+          'R' si el color del nodo actual es RED.
+    */
     cout << [level](){ string r = ""; for(int i = 0; i < level; ++i) r+="   "; return r; }() << ((T == NULL)?"-B":to_string(T->data)+((T->color == RED)?"R":"B")) << "\n";
+    //Si el árbol está vacío, ya se indicó en la línea anterior, no hay nada más que hacer
     if( T == NULL ) return;
+    //Se muestra el subárbol izquierdo
     RBT_show_with_levels(T->left, level + 1);
+    //Se muestra el subárbol derecho
     RBT_show_with_levels(T->right, level + 1);
 }
 
+/* Función auxiliar para insertar un nuevo nodo en un RBT  */
 void RBT_fixInsertion(TreeNode* n) {
+    /* Escenario 1 */
+    
+    //n es root
     if( T == n ) {
+        //n se hace BLACK
         n->color = BLACK;
+
+        //Se termina el proceso
         return;
     }
 
+    /* Escenario 2 */
+
+    //p es BLACK
+    //Simplemente se termina el proceso
     if( n->parent->color == BLACK ) return;
 
+    /* Escenario 3 */
+    //p es RED
+
+    //Se preparan los demás protagonistas
     TreeNode* p = n->parent;
     TreeNode* g = p->parent;
     TreeNode* u = NULL;
+    //Se verifica que el abuelo exista, para poder
+    //definir a u, de lo contrario se queda en NULL
     if( g != NULL )
+        //Si p es el hijo izquierdo de g, u es el hijo derecho
         if( check_child_side(p) == LEFT ) u = g->right;
+        //Si p es el hijo derecho de g, u es el hijo izquierdo
         else u = g->left;
-    
+
+    //u es BLACK
     if( u == NULL || u->color == BLACK ) {
+        //n, p y g forman un triángulo
+        //Esto ocurre cuando n es hijo de p al lado opuesto del que p es hijo de g
         if( check_child_side(n) != check_child_side(p) ) {
+            //Rotar p y n
+            //Si n es hijo izquierdo de p, es Right Rotation
             if( check_child_side(n) == LEFT ) rightRotation(p,n);
+            //Si n es hijo derecho de p, es Left Rotation
             else leftRotation(p,n);
+            //p se hace el nuevo n
             n = p;
+            //Se actualiza p como el padre del nuevo n
             p = n->parent;
             //g y u se quedan igual
         }
+
+        /*
+            El bloque anterior se encuentra antes del bloque siguiente,
+            ya que cuando ocurre que n, p y g están en triángulo, el
+            proceso continúa precisamente con el escenario en el que
+            están en línea recta.
+            Cuando n, p y g estén en línea recta desde un inicio, el
+            bloque anterior simplemente no se ejecutará.
+        */
+
+        //n, p y g forman una línea recta
+        //Rotar g y p
+        //Si p es hijo izquierdo de g, es Right Rotation
         if( check_child_side(p) == LEFT ) rightRotation(g,p);
+        //Si p es hijo derecho de g, es Left Rotation
         else leftRotation(g,p);
+        //p se hace BLACK
         p->color = BLACK;
+        //g se hace RED
+        //Se verifica primero que g no sea nulo
         if( g != NULL) g->color = RED;
-    } else {
+        //Se termina el proceso
+    }
+    //u es RED
+    else {
+        //p se hace BLACK
         p->color = BLACK;
+        //u se hace BLACK
+        //Se verifica primero que u no sea nulo
         if( u != NULL ) u->color = BLACK;
+        //g se hace RED
+        //Se verifica primero que g no sea nulo
         if( g != NULL ) g->color = RED;
+        //g se hace el nuevo n y se reinicia el proceso
+        //Esto se hace por recursión enviando g como el nuevo n
         RBT_fixInsertion(g);
     }
 }
 
+/*
+    Función para insertar un nuevo nodo en un RBT
+    Se asume que no hay datos repetidos en el árbol.
+*/
 void RBT_insert(int value) {
+    //Se inserta el nuevo nodo como en un BST
     BST_insert(value);
+    //Se extrae el nuevo nodo insertado
     TreeNode* n = BST_get(T, value);
+    //Se procede con el algoritmo correspondiente
+    //a inserción en RBTs
     RBT_fixInsertion(n);
 }
 
+/*
+    Función para eliminar un nodo en un RBT
+    Se asume que no hay datos repetidos en el árbol.
+*/
 void RBT_delete(int value) {
+    //Se extrae el nodo a eliminar
     TreeNode* d = BST_get(T, value);
+    //Se define p, el padre del nodo a eliminar
     TreeNode* p = d->parent;
+    //Se extrae de qué lado de su padre está el nodo a eliminar
     enum side deadSide = check_child_side(d);
-    enum color deadColor = d->color;    
+    //Se extrae el color del nodo a eliminar
+    enum color deadColor = d->color;
+    //Se prepara s, el hermano del nodo a eliminar
     TreeNode* s = NULL;
+    //Se verifica si p no es nulo, si lo es, s se quedará en nulo también
     if( p != NULL )
+        //Si nodo a eliminar está a la izquierda de p, s es el hijo derecho de p
         if( deadSide == LEFT ) s = p->right;
+        //Si nodo a eliminar está a la derecha de p, s es el hijo izquierdo de p
         else s = p->left;
 
+    //Se procede a eliminar el nodo como en un BST
+    //Se obtendrá de retorno la dirección del hijo único del nodo eliminado (h)
     TreeNode* h = BST_delete(value);
 
+    
     if( deadColor == RED || (h != NULL && h->color == RED) ) {
         if( h != NULL) h->color = BLACK;
         return;
@@ -325,6 +534,9 @@ void RBT_delete(int value) {
         }
     }while(true);
 }
+
+
+/********** Main *********/
 
 int main() {
     /*

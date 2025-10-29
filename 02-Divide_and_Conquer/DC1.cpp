@@ -1,8 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-//Naive approach
-//Brute Force approach
+//Naive approach / Brute Force approach
 double power_function(double a, int b){
     //Acumulador
     double acum = 1;

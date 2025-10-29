@@ -8,6 +8,8 @@ void show_array(int A[], int n){
     cout << "]\n";
 }
 
+/******** Funciones de Heaps (Max-Heap específicamente) ********/
+
 int parent(int i){
     return (i-1)/2;
 }
@@ -45,7 +47,8 @@ void build_max_heap(int A[], int heap_size){
         max_heapify(A, i, heap_size);
 }
 
-//Algoritmo que realiza el proceso de ordenamiento
+/******* Algoritmo que realiza el proceso de ordenamiento *******/
+
 void heapsort(int A[], int n){
     //Tamaño inicial del montículo es la longitud del arreglo
     int heap_size = n;
@@ -66,9 +69,7 @@ void heapsort(int A[], int n){
     }
 }
 
-/*
-  Main
-*/
+/*  Main  */
 int main(void){
     //Arreglo de prueba
     int n = 10, A[n] = {77,79,34,32,80,22,45,1,13,21};

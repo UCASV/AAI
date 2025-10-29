@@ -24,8 +24,8 @@ int main(int argc, char** argv){
     }
 
     //Se preparan variables para medición del tiempo
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    std::chrono::duration<double> time_insertion, time_selection, time_bubble, time_merge, time_heap, time_quick;
+    chrono::time_point<chrono::system_clock> start, end;
+    chrono::duration<double> time_insertion, time_selection, time_bubble, time_merge, time_heap, time_quick;
 
     /*****************************************************************************************/
     /*
@@ -33,34 +33,34 @@ int main(int argc, char** argv){
         su tiempo de ejecución.
     */
 
-    start = std::chrono::system_clock::now();
+    start = chrono::system_clock::now();
     insertion_sort(A, n);
-    end = std::chrono::system_clock::now();
+    end = chrono::system_clock::now();
     time_insertion = end - start;
 
-    start = std::chrono::system_clock::now();
+    start = chrono::system_clock::now();
     selection_sort(B, n);
-    end = std::chrono::system_clock::now();
+    end = chrono::system_clock::now();
     time_selection = end - start;
 
-    start = std::chrono::system_clock::now();
+    start = chrono::system_clock::now();
     bubble_sort(C, n);
-    end = std::chrono::system_clock::now();
+    end = chrono::system_clock::now();
     time_bubble = end - start;
 
-    start = std::chrono::system_clock::now();
+    start = chrono::system_clock::now();
     merge_sort(D, 0, n-1);
-    end = std::chrono::system_clock::now();
+    end = chrono::system_clock::now();
     time_merge = end - start;
 
-    start = std::chrono::system_clock::now();
+    start = chrono::system_clock::now();
     heapsort(E, n);
-    end = std::chrono::system_clock::now();
+    end = chrono::system_clock::now();
     time_heap = end - start;
 
-    start = std::chrono::system_clock::now();
+    start = chrono::system_clock::now();
     quicksort(F, 0, n-1);
-    end = std::chrono::system_clock::now();
+    end = chrono::system_clock::now();
     time_quick = end - start;
 
     //Se informan los resultados
