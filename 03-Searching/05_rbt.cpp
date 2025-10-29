@@ -470,23 +470,59 @@ void RBT_delete(int value) {
 
     //Se procede a eliminar el nodo como en un BST
     //Se obtendrá de retorno la dirección del hijo único del nodo eliminado (h)
+    /*
+        NOTA: BST_delete se encarga "involuntariamente" de los siguientes pasos:
+                - Borrar d
+                - h toma el lugar de d
+              Esto es válido en cualquier escenario de borrado de nodos en RBT
+              donde aparezcan.
+    */
     TreeNode* h = BST_delete(value);
 
-    
+    /* Escenario 1 */
+
+    //d es RED o h es RED
+    //deadColor contiene el color del nodo eliminado.
+    //Se verifica si h no es nulo, en cuyo caso tendría un color BLACK
     if( deadColor == RED || (h != NULL && h->color == RED) ) {
+        //h se hace BLACK
+        //Se verifica primero que h no sea nulo
         if( h != NULL) h->color = BLACK;
+        //Se termina el proceso
         return;
     }
 
+    /* Escenario 2 */
+    //d es BLACK y h es BLACK
+
+    //h se hace DOUBLE_BLACK
+    //Se verifica que h no sea nulo
     if( h != NULL) h->color = DOUBLE_BLACK;
     
+    /*
+        Se encierra todo lo siguiente en un DO-WHILE debido a los
+        escenarios que retroceden en el procedimiento.
+        Se sabe que eventualmente el proceso terminará.
+    */
     do{
+        /* Escenario 2.1 */
+        
+        //h es root
         if( T == h ) {
+            //h se hace BLACK
+            //Se verifica primero que h no sea nulo
             if( h != NULL) h->color = BLACK;
+            //Se termina el proceso
             return;
         }
 
+        /* Escenario 2.2 */
+
+        //s es BLACK
+        //Esto puede pasar si s es nulo, o si tiene dato y su color es BLACK
         if( s == NULL || s->color == BLACK ) {
+            //los dos n son BLACK
+            //
             if( (s == NULL) || ((s->left == NULL || s->left->color == BLACK) && (s->right == NULL || s->right->color == BLACK)) ) {
                 if( h != NULL) h->color = BLACK;
                 if( s != NULL ) s->color = RED;
