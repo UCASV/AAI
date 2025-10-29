@@ -558,25 +558,59 @@ void RBT_delete(int value) {
                 }
             }
             //al menos un n es RED
+            //Si ambos son rojos, se tomará como n el de la izquierda por defecto.
+            //Puede añadirse una verificación adicional para que cuando los dos sean rojos,
+            //se seleccione el que provoque menor trabajo.
             else {
-                
+                //Se prepara n
                 TreeNode* n = NULL;
+                //Se verifica cuál de los dos hijos de s es RED, para apuntar n hacia él
                 if( s->left != NULL && s->left->color == RED ) n = s->left;
                 else n = s->right;
 
+                //n, s y p forman un triángulo
+                //Esto ocurre cuando n es hijo de s al lado opuesto del que s es hijo de p
                 if( check_child_side(n) != check_child_side(s) ) {
+                    //Intercambiar colores de s y n
                     swap(s->color, n->color);
+                    //Rotar s y n
+                    //Si n es hijo izquierdo de s, es Right Rotation
                     if( check_child_side(n) == LEFT ) rightRotation(s,n);
+                    //Si n es hijo derecho de s, es Left Rotation
                     else leftRotation(s,n);
+                    //s se hace el nuevo n
                     n = s;
+                    //Se actualiza s con el padre del nuevo n
                     s = n->parent;
+                    //p se mantiene igual
                 }
+
+                /*
+                    El bloque anterior se encuentra antes del bloque siguiente,
+                    ya que cuando ocurre que n, s y p están en triángulo, el
+                    proceso continúa precisamente con el escenario en el que
+                    están en línea recta.
+                    Cuando n, s y p estén en línea recta desde un inicio, el
+                    bloque anterior simplemente no se ejecutará.
+                */
+
+                //n, s y p forman una línea recta
+                //Intercambiar colores de p y s
                 swap(p->color, s->color);
+                //Rotar p y s
+                //Si s es hijo izquierdo de p, es Right Rotation
                 if( check_child_side(s) == LEFT ) rightRotation(p,s);
+                //Si s es hijo derecho de p, es Left Rotation
                 else leftRotation(p,s);
+                //p se hace BLACK
                 p->color = BLACK;
+                //n se hace BLACK
                 n->color = BLACK;
+                //h se hace BLACK
+                //Se verifica primero que no sea nulo
                 if( h != NULL) h->color = BLACK;
+
+                //Se termina el proceso
                 break;
             }
         }
@@ -585,14 +619,25 @@ void RBT_delete(int value) {
 
         //s es RED
         else {
+            //Intercambiar colores de p y s
             swap(p->color, s->color);
+            //Rotar p y s
+            //Si s es hijo izquierdo de p, es Right Rotation
             if( check_child_side(s) == LEFT ){
                 rightRotation(p,s);
+                //Se actualiza s con el hijo izquierdo de p
+                //(el nuevo hermano de h después de rotar)
                 s = p->left;
-            } else{
+            }
+            //Si s es hijo derecho de p, es Left Rotation
+            else{
                 leftRotation(p,s);
+                //Se actualiza s con el hijo derecho de p
+                //(el nuevo hermano de h después de rotar)
                 s = p->right;
             }
+
+            //Se regresa al punto después de que h se hizo DOUBLE_BLACK
             continue;
         }
     }while(true);
@@ -602,6 +647,18 @@ void RBT_delete(int value) {
 /********** Main *********/
 
 int main() {
+
+    /*
+        Los bloques de pruebas en este Main son mutuamente
+        excluyentes, si se desea utilizar uno de ellos, debe
+        descomentarse y comentar los demás.
+
+        El bloque que inicia descomentado por defecto es el de
+        borrado de nodos en RBT.
+    */
+
+/***** Prueba de inserción y borrado en BST *****/
+
     /*
     BST_insert(50);
     BST_insert(10);
@@ -609,11 +666,19 @@ int main() {
     BST_insert(60);
     BST_insert(55);
     BST_show_with_levels(T, 0);
+    
+    // Los siguientes ejemplos de borrado son mutuamente excluyentes,
+    // para probar uno, descomentarlo y comentar los otros.
+
     //BST_delete(55);
     //BST_delete(10);
     BST_delete(50);
+
     BST_show_with_levels(T, 0);
     */
+    
+/***** Prueba de inserción en RBT *****/
+
     /*
     RBT_insert(50);
     RBT_show_with_levels(T, 0);
@@ -626,27 +691,54 @@ int main() {
     RBT_insert(33);
     RBT_show_with_levels(T, 0);
     */
+
+/***** Prueba de borrado de la raíz en RBT *****/
+
     /*
     RBT_insert(50);
     RBT_delete(50);
     RBT_show_with_levels(T, 0);
     */
     
+/***** Pruebas de borrado de BST *****/
+
     int values[18] = {20,12,40,10,15,30,45,5,11,13,18,28,35,2,6,14,31,38};
     for(int i = 0; i < 18; ++i)
         RBT_insert(values[i]);
     //RBT_show_with_levels(T, 0);
+
+    // Los siguientes ejemplos de borrado son mutuamente excluyentes,
+    // para probar uno, descomentarlo y comentar los otros.
+
+    //Caso: d es RED, h es BLACK
     RBT_delete(14);
+
+    //Caso: d es BLACK, h es RED
     //RBT_delete(13);
-    //RBT_delete(6);RBT_delete(11);
+
+    //Caso: d es BLACK, h es BLACK, s es BLACK, el n que es RED está en línea recta con s y p
+    //RBT_delete(6); RBT_delete(11);
+
+    //Caso: d es BLACK, h es BLACK, s es BLACK, el n que es RED está en triángulo con s y p
     //RBT_delete(18);
+
+    //Caso: d es BLACK, h es BLACK, s es BLACK, los dos n son BLACK, p es BLACK
     //RBT_delete(2); RBT_delete(6); RBT_delete(5); RBT_delete(11); RBT_delete(13); RBT_delete(18); RBT_delete(14); RBT_delete(15);
+
+    //Caso: d es BLACK, h es BLACK, s es BLACK, los dos n son BLACK, p es RED
     //RBT_delete(2); RBT_delete(6); RBT_delete(5);
+
+    //Caso: d es BLACK, h es BLACK, s es RED
     //RBT_delete(45);
+    
     RBT_show_with_levels(T, 0);
-    
-    
+
+
+/**************************************************************/
+/***** Destrución del árbol antes de terminar el programa *****/
+
     BST_destroy(T);
+
 
     return 0;
 }
